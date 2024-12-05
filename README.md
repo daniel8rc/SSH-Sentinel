@@ -14,7 +14,7 @@ SSH Sentinel es una aplicación de escritorio desarrollada en Python que permite
 
 ## Capturas de Pantalla
 
-_(Aquí puedes añadir capturas de pantalla de la aplicación para mostrar la interfaz y funcionalidades principales.)_
+_(pendiente)_
 
 ## Instalación
 
@@ -29,7 +29,7 @@ _(Aquí puedes añadir capturas de pantalla de la aplicación para mostrar la in
 ### Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu_usuario/ssh-sentinel.git
+git clone https://github.com/daniel8rc/SSH-Sentinel.git
 cd ssh-sentinel
 ```
 
@@ -134,7 +134,7 @@ Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENS
 
 ## Contacto
 
-Desarrollado por [Tu Nombre](https://github.com/tu_usuario). Si tienes alguna pregunta o sugerencia, no dudes en contactarme.
+Desarrollado por [Daniel8rc](https://github.com/daniel8rc). Si tienes alguna pregunta o sugerencia, no dudes en contactarme.
 
 ## Agradecimientos
 

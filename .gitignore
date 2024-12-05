@@ -1,0 +1,5 @@
+config.json
+old
+.vscode
+env
+*__pycache__*

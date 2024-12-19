@@ -7,7 +7,7 @@
 # Author: Daniel Rodríguez Cabrera (daniel8rc@gmail.com)
 # Version: 1.0.0
 # -----
-# Last Modified: Thursday, 5th December 2024 2:07:51 pm
+# Last Modified: Thursday, 5th December 2024 2:47:59 pm
 # Modified By: Daniel Rodríguez Cabrera
 # -----
 # Copyright (c) 2024 - 2025 daniel8rc@gmail.com copying, distribution or modification not authorised in writing is prohibited.
@@ -17,6 +17,7 @@ import time
 import customtkinter as ctk
 from screens.base_screen import BaseScreen
 from loguru import logger
+import tkinter as tk  # Importamos tkinter para usar Listbox
 
 
 class LogViewer(BaseScreen):
@@ -31,7 +32,7 @@ class LogViewer(BaseScreen):
         self.on_back = on_back
 
         self.log_font_size = 14
-        self.current_filter = None
+        self.current_filters = []  # Lista para almacenar múltiples filtros
 
         self.setup_ui()
         threading.Thread(target=self.fetch_logs, daemon=True).start()
@@ -60,20 +61,29 @@ class LogViewer(BaseScreen):
         # Configuración inicial del tamaño de fuente
         self.log_text._textbox.configure(font=("Courier", self.log_font_size))
 
-        # Input de filtro
+        # Frame para los filtros
         filter_frame = ctk.CTkFrame(self.frame)
         filter_frame.pack(pady=10)
 
-        filter_label = ctk.CTkLabel(filter_frame, text="Filtrar logs:")
+        filter_label = ctk.CTkLabel(filter_frame, text="Agregar filtro:")
         filter_label.pack(side="left", padx=5)
 
         self.filter_entry = ctk.CTkEntry(filter_frame, width=200)
         self.filter_entry.pack(side="left", padx=5)
 
-        filter_button = ctk.CTkButton(
-            filter_frame, text="Aplicar", command=self.apply_filter
+        add_filter_button = ctk.CTkButton(
+            filter_frame, text="Agregar", command=self.add_filter
         )
-        filter_button.pack(side="left", padx=5)
+        add_filter_button.pack(side="left", padx=5)
+
+        # Listbox para mostrar los filtros actuales
+        self.filter_listbox = tk.Listbox(filter_frame, height=5)
+        self.filter_listbox.pack(side="left", padx=5)
+
+        remove_filter_button = ctk.CTkButton(
+            filter_frame, text="Eliminar Seleccionado", command=self.remove_filter
+        )
+        remove_filter_button.pack(side="left", padx=5)
 
         back_btn = ctk.CTkButton(
             self.frame,
@@ -102,12 +112,24 @@ class LogViewer(BaseScreen):
         self.log_text.tag_config("warning", foreground="orange")
         self.log_text.tag_config("info", foreground="blue")
 
-    def apply_filter(self):
+    def add_filter(self):
         """
-        Aplica el filtro a los logs.
+        Agrega un filtro a la lista de filtros actuales.
         """
-        self.current_filter = self.filter_entry.get().strip() or None
-        self.log_text.delete("1.0", "end")  # Limpia los logs actuales
+        filter_text = self.filter_entry.get().strip()
+        if filter_text:
+            self.current_filters.append(filter_text)
+            self.filter_listbox.insert('end', filter_text)
+            self.filter_entry.delete(0, 'end')
+
+    def remove_filter(self):
+        """
+        Elimina el filtro seleccionado de la lista.
+        """
+        selected_indices = self.filter_listbox.curselection()
+        for index in reversed(selected_indices):
+            self.current_filters.pop(index)
+            self.filter_listbox.delete(index)
 
     def increase_font(self):
         """
@@ -137,6 +159,14 @@ class LogViewer(BaseScreen):
         else:
             self.log_text.insert("end", line)
 
+    def display_line(self, line):
+        """
+        Muestra una línea de log en la interfaz, aplicando filtros.
+        """
+        if not self.current_filters or any(f.lower() in line.lower() for f in self.current_filters):
+            self.highlight_logs(line)
+            self.log_text.see("end")
+
     def fetch_logs(self):
         """
         Obtiene los logs del servidor.
@@ -147,13 +177,8 @@ class LogViewer(BaseScreen):
             while True:
                 line = stdout.readline()
                 if line:
-                    # Aplica el filtro si está configurado
-                    if (
-                        self.current_filter is None
-                        or self.current_filter.lower() in line.lower()
-                    ):
-                        self.highlight_logs(line)
-                        self.log_text.see("end")
+                    # Programar la actualización en el hilo principal
+                    self.root.after(0, self.display_line, line)
                 else:
                     time.sleep(0.1)
         except Exception as e:

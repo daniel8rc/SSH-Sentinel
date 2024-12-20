@@ -4,3 +4,4 @@ tabulate
 customtkinter
 paramiko
 loguru
+pillow
